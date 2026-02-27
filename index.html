@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Магазин Олімп - преміальні копченості та м'ясні вироби. Найкращий вибір копченого сала, ковбас, балику та риби.">
+    <title>Олімп - Преміальні Копченості</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <img src="Олімп логотип.png" alt="Олімп Логотип" class="logo-img">
+            </div>
+            <nav class="nav-links">
+                <a href="#about">Про нас</a>
+                <a href="#catalog">Каталог</a>
+                <a href="#contact">Контакти</a>
+            </nav>
+            <div class="cart-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span class="cart-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="about">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <h1>Справжній смак диму</h1>
+            <p>Преміальні м'ясні вироби та копченості від майстрів своєї справи. "Олімп" — це якість, перевірена часом
+                та смаком.</p>
+            <a href="#catalog" class="btn-primary">Переглянути каталог</a>
+        </div>
+    </section>
+
+    <section id="catalog" class="catalog-section">
+        <div class="container">
+            <h2 class="section-title">Наша продукція</h2>
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">Всі товари</button>
+            </div>
+            <div id="product-grid" class="product-grid">
+                <!-- Products will be injected here by script.js -->
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact" class="footer">
+        <!-- Footer remains exactly as it was -->
+        <div class="container footer-content">
+            <div class="footer-info">
+                <img src="Олімп логотип.png" alt="Олімп" class="footer-logo">
+                <p>Багатий смак. Традиційні рецепти. 100% натурально.</p>
+            </div>
+            <div class="footer-contacts">
+                <h3>Зв'яжіться з нами</h3>
+                <p><strong>Власник:</strong> Сергій</p>
+                <p><strong>Телефон:</strong> <a href="tel:+380675674246">+38 (067) 567-42-46</a></p>
+                <p><strong>Email:</strong> <a href="mailto:pulenok@ukr.net">pulenok@ukr.net</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Магазин "Олімп". Всі права захищені.</p>
+        </div>
+    </footer>
+
+    <!-- Shopping Cart Modal -->
+    <div class="cart-overlay" id="cart-overlay">
+        <div class="cart-modal">
+            <div class="cart-header">
+                <h2>Ваш кошик</h2>
+                <button class="close-cart" id="close-cart">&times;</button>
+            </div>
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items injected here -->
+            </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Разом (орієнтовно):</span>
+                    <span id="cart-total-price">0 грн</span>
+                </div>
+
+                <form id="checkout-form" class="checkout-form" action="https://api.web3forms.com/submit" method="POST">
+
+                    <!-- Web3Forms Required Config -->
+                    <!-- USER: Замініть ВАШ_КЛЮЧ_ДОСТУПУ на справжній ключ отриманий на web3forms.com -->
+                    <input type="hidden" name="access_key" value="ВАШ_КЛЮЧ_ДОСТУПУ">
+                    <input type="hidden" name="subject" value="Нове замовлення - Олімп">
+                    <input type="hidden" name="from_name" value="Магазин Олімп">
+                    <!-- Запобігаємо переадресації від Web3Forms для обробки через JS -->
+
+                    <h3>Оформлення замовлення</h3>
+                    <input type="text" id="lastName" name="Прізвище" placeholder="Прізвище" required>
+                    <input type="text" id="firstName" name="Ім'я" placeholder="Ім'я" required>
+                    <input type="text" id="patronymic" name="По батькові" placeholder="По батькові" required>
+                    <input type="tel" id="phone" name="Телефон" placeholder="Номер телефону (+380...)" required>
+
+                    <select id="paymentMethod" name="Спосіб_оплати" required>
+                        <option value="" disabled selected>Виберіть спосіб оплати</option>
+                        <option value="Оплата на карту продавця">Оплата на карту продавця</option>
+                        <option value="При отриманні (накладений платіж)">При отриманні (накладений платіж)</option>
+                    </select>
+
+                    <!-- Hidden field to hold the cart summary for the email -->
+                    <textarea id="orderDetails" name="Замовлені_товари" style="display:none;"></textarea>
+
+                    <button type="submit" id="submit-btn" class="btn-primary w-100">Відправити замовлення</button>
+                    <p class="form-disclaimer">Після відправлення ми зв'яжемося з вами для уточнення ваги. Ціна на
+                        крафтову продукцію залежить від точної ваги шматка.</p>
+                    <p id="form-result" style="display:none; text-align:center; margin-top:10px; font-weight:bold;"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
