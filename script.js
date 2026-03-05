@@ -1,49 +1,80 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // List of products populated dynamically from folder contents
-    const products = [
-        { title: "Балик 2", image: "Балик 2.jpg", price: 350 },
-        { title: "Балик 3", image: "Балик 3.jpg", price: 350 },
-        { title: "Балик", image: "Балик.jpg", price: 350 },
-        { title: "Ковбаса 1", image: "Ковбаса 1.jpg", price: 250 },
-        { title: "Ковбаса 2", image: "Ковбаса 2.jpg", price: 250 },
-        { title: "Ковбаса преміум", image: "Ковбаса преміум.jpg", price: 300 },
-        { title: "Копчений хребет", image: "Копчений хребет.jpg", price: 150 },
-        { title: "Мойва", image: "Мойва.jpg", price: 180 },
-        { title: "Паштет", image: "Паштет.jpg", price: 120 },
-        { title: "Перепілка", image: "Перепілка.jpg", price: 200 },
-        { title: "Сало копченне", image: "Сало копченне.jpg", price: 200 },
-        { title: "Свинні вушка", image: "Свинні вушка.jpg", price: 160 },
-        { title: "Тушонка з скумбрії", image: "Тушонка з скумбрії.jpg", price: 140 },
-        { title: "Тушонка куряча", image: "Тушонка куряча.jpg", price: 120 },
-        { title: "Тушонка свинна", image: "Тушонка свинна.jpg", price: 130 },
-        { title: "Шиї копченні", image: "Шиї копченні.jpg", price: 110 },
-        { title: "Салака копчена", image: "алака коп.jpg", price: 150 },
-        { title: "Вирізка копчена", image: "вирізка копчена.jpg", price: 380 },
-        { title: "Вомер 2", image: "вомер 2.jpg", price: 220 },
-        { title: "Вомер", image: "вомер.jpg", price: 220 },
-        { title: "Ковбаса 3", image: "ковбаса 3.jpg", price: 250 },
-        { title: "Ковбаса 4", image: "ковбаса 4.jpg", price: 250 },
-        { title: "Крило копчене", image: "крило копчене.jpg", price: 140 },
-        { title: "Кілечко ковбаски", image: "кілечко ковбаски.jpg", price: 240 },
-        { title: "Морський окунь копчений", image: "морський окунь коп..jpg", price: 280 },
-        { title: "Намазка", image: "намазка.jpg", price: 100 },
-        { title: "Нога куряча копчена", image: "нога куряча коп..jpg", price: 160 },
-        { title: "Паштет 1", image: "паштет 1.jpg", price: 120 },
-        { title: "Ребро копчене", image: "ребро копчене.jpg", price: 210 },
-        { title: "Риба копчена 1", image: "риба коп 1.jpg", price: 260 },
-        { title: "Риба копченна", image: "риба копченна.jpg", price: 260 },
-        { title: "Рулет 2", image: "рулет 2.jpg", price: 290 },
-        { title: "Рулет", image: "рулет.jpg", price: 290 },
-        { title: "Салака", image: "салака.jpg", price: 150 },
-        { title: "Сало", image: "сало.jpg", price: 190 },
-        { title: "Серця курячі копчені", image: "серця курячі коп.jpg", price: 180 },
-        { title: "Сиров'ялене м'ясо", image: "сировялене мясо.jpg", price: 400 },
-        { title: "Сирокопчений балик", image: "сирокопчений балик.jpg", price: 420 },
-        { title: "Скумбрія копчена", image: "скумбрія коп.jpg", price: 230 },
-        { title: "Сосиски копчені", image: "сосиски коп.jpg", price: 190 },
-        { title: "Тушонка з коропа", image: "тушонка з коропа.jpg", price: 130 },
-        { title: "Тушонка товстолоб", image: "тушонка товстолоб.jpg", price: 140 }
+    // List of product image filenames
+    // When adding a new product, just add its filename here:
+    const productFiles = [
+        "Барабуля г.к 480 грн.jpg",
+        "Биток копчений 455грн.jpg",
+        "Биток сирокопчений 470 грн.jpg",
+        "Вирізка копчена 480 грн.jpg",
+        "Вирізка сирокопчена 490 грн.jpg",
+        "Вомер х.к 350 грн.jpg",
+        "Вуха різані в соусі 410 грн.jpg",
+        "Гомілки копчені 170 грн.jpg",
+        "Джерки 1250 грн.jpg",
+        "Дорадо х.к 750 грн.jpg",
+        "Кабаноси сушені 800 грн.jpg",
+        "Ковбаса  450 грн..jpg",
+        "Ковбаса Рубана Свино-яловича 450 грн.jpg",
+        "Ковбаса Сервілат 400 грн..jpg",
+        "Ковбаса Шахтарська 450 грн..jpg",
+        "Ковбаса домашня 450 грн.jpg",
+        "Ковбаса куряча філейна 400 грн.jpg",
+        "Консерва короп з овочами 155 грн.jpg",
+        "Крило куряче копчене 235 грн.jpg",
+        "Мойва копчена 400 грн.jpg",
+        "Морський окунь г.к  450 грн.jpg",
+        "Намазка з сала 90 грн.jpg",
+        "Ошийок копчений 480 грн..jpg",
+        "Ошийок сирокопчений 490 грн.jpg",
+        "Паштет печінковий  125 грн.jpg",
+        "Паштет рибний 100грн.jpg",
+        "Перепілка копчена 450 грн.jpg",
+        "Підчеревина копчена 360 грн.jpg",
+        "Ребро копчене 380 грн.jpg",
+        "Рулет зі свинин копчений 380 грн.jpg",
+        "Сайра х.к 400 грн.jpg",
+        "Серце куряче копчене 450 грн.jpg",
+        "Скумбрія х.к 630 грн.jpg",
+        "Ставрида копчена 400 грн.jpg",
+        "Стегно куряче 260 грн.jpg",
+        "Тушонка куряча  100 грн.jpg",
+        "Філе куряче 350 грн.jpg",
+        "Шиї курячі 165грн.jpg",
+        "кілька в томаті з овочами 120 грн.jpg",
+        "салака х.к 230 грн.jpg",
+        "хребет копчений 225 грн.jpg"
     ];
+
+    // Automatically parse the filename to extract the name and price
+    const products = productFiles.map(filename => {
+        // Remove file extension and replace double spaces
+        let cleanName = filename.replace(/\.(jpg|jpeg|png)$/i, "").replace(/\./g, "").trim();
+
+        // Find the price (numbers before word "грн")
+        // Example matches: "480 грн", "455грн", "450  грн"
+        let priceMatch = cleanName.match(/(\d+)\s*грн/i);
+        let price = 0;
+        let title = cleanName;
+
+        if (priceMatch) {
+            price = parseInt(priceMatch[1], 10);
+            // Remove the price text from the title
+            title = cleanName.replace(priceMatch[0], "").trim();
+            // Remove any trailing hyphens or commas
+            title = title.replace(/[-_,]+$/, "").trim();
+        }
+
+        // Capitalize first letter of title for aesthetics
+        if (title.length > 0) {
+            title = title.charAt(0).toUpperCase() + title.slice(1);
+        }
+
+        return {
+            title: title,
+            image: filename,
+            price: price
+        };
+    });
 
     const productGrid = document.getElementById("product-grid");
     const cartCountEl = document.querySelector(".cart-count");
@@ -181,9 +212,16 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // populate hidden order field
-        let orderList = cart.map(item => `- ${item.title}: ${item.quantity} шт.`).join("\n");
-        document.getElementById("orderDetails").value = orderList;
+        let totalOrderSum = 0;
+        let orderList = cart.map(item => {
+            const itemSum = item.price * item.quantity;
+            totalOrderSum += itemSum;
+            return `- ${item.title}: ${item.quantity} шт. x ~${item.price} грн = ~${itemSum} грн`;
+        });
+
+        orderList.push(`\nЗагальна сума (орієнтовно): ~${totalOrderSum} грн`);
+
+        document.getElementById("orderDetails").value = orderList.join("\n");
 
         const formData = new FormData(checkoutForm);
         const object = {};
