@@ -81,6 +81,15 @@ document.addEventListener("DOMContentLoaded", () => {
         let titleLower = product.title.toLowerCase();
         let categories = ['all']; // Every product belongs to 'all'
 
+        // Determine unit (kg or pcs)
+        if (titleLower.includes('консерва') || titleLower.includes('паштет') ||
+            titleLower.includes('тушонка') || titleLower.includes('кілька') ||
+            titleLower.includes('намазка')) {
+            product.unit = 'pcs';
+        } else {
+            product.unit = 'kg';
+        }
+
         // Rule-based categorization
         if (titleLower.includes('барабуля') || titleLower.includes('вомер') || titleLower.includes('дорадо') ||
             titleLower.includes('мойва') || titleLower.includes('окунь') || titleLower.includes('сайра') ||
@@ -149,15 +158,44 @@ document.addEventListener("DOMContentLoaded", () => {
             // Reduce animation delay to make it snappier when filtering
             card.style.animationDelay = `${(index % 10) * 0.03}s`;
 
+            const unitLabel = product.unit === 'pcs' ? 'шт' : 'кг';
+
+            let selectionControl = '';
+            if (product.unit === 'pcs') {
+                selectionControl = `
+                    <div class="quantity-selector">
+                        <input type="number" class="item-qty" value="1" min="1" max="50" step="1" id="qty-${originalIndex}">
+                        <span>шт</span>
+                    </div>
+                `;
+            } else {
+                let options = '';
+                for (let w = 0.1; w <= 2.0; w += 0.1) {
+                    let weight = w.toFixed(1);
+                    let selected = (weight === "1.0") ? "selected" : "";
+                    options += `<option value="${weight}" ${selected}>${weight} кг</option>`;
+                }
+                selectionControl = `
+                    <div class="quantity-selector">
+                        <select class="item-qty" id="qty-${originalIndex}">
+                            ${options}
+                        </select>
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
                 <div class="product-image-wrapper">
                     <img src="${product.image}" alt="${product.title}" class="product-image" loading="lazy">
                 </div>
                 <div class="product-info">
                     <h3 class="product-title">${product.title}</h3>
+                    <div class="price-row">
+                        <span class="price-placeholder">~${product.price} грн / ${unitLabel}</span>
+                    </div>
                     <div class="product-action">
+                        ${selectionControl}
                         <button class="add-to-cart" data-index="${originalIndex}">В кошик</button>
-                        <span class="price-placeholder" style="font-size:0.9rem; font-weight:normal;">~${product.price} грн</span>
                     </div>
                 </div>
             `;
@@ -192,8 +230,10 @@ document.addEventListener("DOMContentLoaded", () => {
         let count = 0;
 
         cart.forEach((item, index) => {
-            count += item.quantity;
-            total += item.price * item.quantity;
+            const itemSum = item.price * item.amount;
+            total += itemSum;
+
+            const amountDisplay = item.unit === 'pcs' ? `${item.amount} шт.` : `${item.amount.toFixed(1)} кг`;
 
             const cartItemEl = document.createElement("div");
             cartItemEl.className = "cart-item";
@@ -201,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <img src="${item.image}" alt="${item.title}">
                 <div class="cart-item-info">
                     <div class="cart-item-title">${item.title}</div>
-                    <div class="cart-item-price">${item.quantity} шт. x ~${item.price} грн</div>
+                    <div class="cart-item-price">${amountDisplay} x ~${item.price} грн = ~${Math.round(itemSum)} грн</div>
                 </div>
                 <div class="cart-item-actions">
                     <button class="remove-item" data-index="${index}">&times;</button>
@@ -210,8 +250,8 @@ document.addEventListener("DOMContentLoaded", () => {
             cartItemsContainer.appendChild(cartItemEl);
         });
 
-        cartCountEl.textContent = count;
-        cartTotalPriceEl.textContent = `~${total} грн`;
+        cartCountEl.textContent = cart.length;
+        cartTotalPriceEl.textContent = `~${Math.round(total)} грн`;
 
         // Attach remove events
         document.querySelectorAll(".remove-item").forEach(btn => {
@@ -236,11 +276,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const product = products[productIndex];
 
                 // Check if already in cart
+                const qtyInput = document.getElementById(`qty-${productIndex}`);
+                const amount = parseFloat(qtyInput.value) || 1;
+
                 const existingItem = cart.find(i => i.title === product.title);
                 if (existingItem) {
-                    existingItem.quantity += 1;
+                    existingItem.amount += amount;
                 } else {
-                    cart.push({ ...product, quantity: 1 });
+                    cart.push({ ...product, amount: amount });
                 }
 
                 updateCartUI();
@@ -295,9 +338,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let totalOrderSum = 0;
         let orderList = cart.map(item => {
-            const itemSum = item.price * item.quantity;
+            const itemSum = Math.round(item.price * item.amount);
             totalOrderSum += itemSum;
-            return `- ${item.title}: ${item.quantity} шт. x ~${item.price} грн = ~${itemSum} грн`;
+            const amountDisplay = item.unit === 'pcs' ? `${item.amount} шт.` : `${item.amount.toFixed(1)} кг`;
+            return `- ${item.title}: ${amountDisplay} x ~${item.price} грн = ~${itemSum} грн`;
         });
 
         orderList.push(`\nЗагальна сума (орієнтовно): ~${totalOrderSum} грн`);
