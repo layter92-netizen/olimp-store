@@ -116,7 +116,7 @@ a {
     justify-content: center;
     text-align: center;
     position: relative;
-    background: url('Балик.jpg') center/cover no-repeat;
+    background: url('fon1.jpg') center/cover no-repeat;
     margin-top: 80px;
 }
 
@@ -170,6 +170,32 @@ a {
 /* Catalog */
 .catalog-section {
     padding: 100px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.catalog-section::before,
+.catalog-section::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: -1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.catalog-section::before {
+    top: 0;
+    height: 50%;
+    background-image: linear-gradient(rgba(18, 18, 18, 0.6), rgba(18, 18, 18, 1)), url('fon1.jpg');
+}
+
+.catalog-section::after {
+    bottom: 0;
+    height: 50%;
+    background-image: linear-gradient(rgba(18, 18, 18, 1), rgba(18, 18, 18, 0.6)), url('fon2.jpg');
 }
 
 .section-title {
