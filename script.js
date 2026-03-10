@@ -76,6 +76,45 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     });
 
+    // Add categories to products
+    products.forEach(product => {
+        let titleLower = product.title.toLowerCase();
+        let categories = ['all']; // Every product belongs to 'all'
+
+        // Rule-based categorization
+        if (titleLower.includes('барабуля') || titleLower.includes('вомер') || titleLower.includes('дорадо') ||
+            titleLower.includes('мойва') || titleLower.includes('окунь') || titleLower.includes('сайра') ||
+            titleLower.includes('скумбрія') || titleLower.includes('ставрида') || titleLower.includes('кілька') ||
+            titleLower.includes('салака') || titleLower.includes('рибний')) {
+            categories.push('fish');
+        }
+
+        if (titleLower.includes('биток') || titleLower.includes('вирізка') || titleLower.includes('вуха') ||
+            titleLower.includes('ковбаса') || titleLower.includes('ошийок') || titleLower.includes('підчеревина') ||
+            titleLower.includes('ребро') || titleLower.includes('рулет') || titleLower.includes('намазка з сала') ||
+            titleLower.includes('кабаноси') || titleLower.includes('печінковий')) {
+            categories.push('pork');
+        }
+
+        if (titleLower.includes('гомілки') || titleLower.includes('куряча') || titleLower.includes('куряче') ||
+            titleLower.includes('курячі') || titleLower.includes('перепілка') || titleLower.includes('стегно') ||
+            titleLower.includes('серце') || titleLower.includes('крило')) {
+            categories.push('chicken');
+        }
+
+        if (titleLower.includes('яловича')) {
+            categories.push('beef');
+        }
+
+        // Add 'beer' category for specific items
+        if (titleLower.includes('джерки') || titleLower.includes('кабаноси') || titleLower.includes('вуха') ||
+            titleLower.includes('барабуля') || titleLower.includes('вомер') || titleLower.includes('мойва')) {
+            categories.push('beer');
+        }
+
+        product.categories = categories;
+    });
+
     const productGrid = document.getElementById("product-grid");
     const cartCountEl = document.querySelector(".cart-count");
 
@@ -86,29 +125,64 @@ document.addEventListener("DOMContentLoaded", () => {
     const cartItemsContainer = document.getElementById("cart-items");
     const cartTotalPriceEl = document.getElementById("cart-total-price");
     const checkoutForm = document.getElementById("checkout-form");
+    const filterBtns = document.querySelectorAll(".filter-btn");
 
     let cart = [];
 
-    // Generate product cards
-    products.forEach((product, index) => {
-        const card = document.createElement("div");
-        card.className = "product-card animate-in";
-        card.style.animationDelay = `${(index % 10) * 0.05}s`;
+    // Generate product cards function
+    function renderProducts(filterCategory = 'all') {
+        productGrid.innerHTML = ''; // Clear grid
 
-        card.innerHTML = `
-            <div class="product-image-wrapper">
-                <img src="${product.image}" alt="${product.title}" class="product-image" loading="lazy">
-            </div>
-            <div class="product-info">
-                <h3 class="product-title">${product.title}</h3>
-                <div class="product-action">
-                    <button class="add-to-cart" data-index="${index}">В кошик</button>
-                    <span class="price-placeholder" style="font-size:0.9rem; font-weight:normal;">~${product.price} грн</span>
+        const filteredProducts = products.filter(product => product.categories.includes(filterCategory));
+
+        if (filteredProducts.length === 0) {
+            productGrid.innerHTML = '<p style="text-align: center; width: 100%; grid-column: 1 / -1;">В цій категорії поки немає товарів.</p>';
+            return;
+        }
+
+        filteredProducts.forEach((product, index) => {
+            // Find original index for cart functionality
+            const originalIndex = products.findIndex(p => p.title === product.title);
+
+            const card = document.createElement("div");
+            card.className = "product-card animate-in";
+            // Reduce animation delay to make it snappier when filtering
+            card.style.animationDelay = `${(index % 10) * 0.03}s`;
+
+            card.innerHTML = `
+                <div class="product-image-wrapper">
+                    <img src="${product.image}" alt="${product.title}" class="product-image" loading="lazy">
                 </div>
-            </div>
-        `;
+                <div class="product-info">
+                    <h3 class="product-title">${product.title}</h3>
+                    <div class="product-action">
+                        <button class="add-to-cart" data-index="${originalIndex}">В кошик</button>
+                        <span class="price-placeholder" style="font-size:0.9rem; font-weight:normal;">~${product.price} грн</span>
+                    </div>
+                </div>
+            `;
 
-        productGrid.appendChild(card);
+            productGrid.appendChild(card);
+        });
+
+        // Re-attach event listeners to new buttons
+        attachAddToCartListeners();
+    }
+
+    // Initial render
+    renderProducts();
+
+    // Filter Button Logic
+    filterBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            // Remove active class from all
+            filterBtns.forEach(b => b.classList.remove("active"));
+            // Add active class to clicked
+            btn.classList.add("active");
+
+            const filterValue = btn.getAttribute("data-filter");
+            renderProducts(filterValue);
+        });
     });
 
     // Update Cart UI
@@ -150,40 +224,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Add to cart functionality
-    document.querySelectorAll(".add-to-cart").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const productIndex = this.getAttribute("data-index");
-            const product = products[productIndex];
-
-            // Check if already in cart
-            const existingItem = cart.find(i => i.title === product.title);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({ ...product, quantity: 1 });
-            }
-
-            updateCartUI();
-
-            // Animation for button
-            const originalText = this.textContent;
-            this.textContent = "Додано!";
-            this.style.background = "var(--accent-gold)";
-            this.style.color = "var(--bg-dark)";
-
-            setTimeout(() => {
-                this.textContent = originalText;
-                this.style.background = "transparent";
-                this.style.color = "var(--accent-gold)";
-            }, 1000);
-
-            // Cart bounce animation
-            cartCountEl.parentElement.style.transform = "scale(1.3)";
-            setTimeout(() => {
-                cartCountEl.parentElement.style.transform = "scale(1)";
-            }, 200);
+    function attachAddToCartListeners() {
+        document.querySelectorAll(".add-to-cart").forEach(btn => {
+            // Remove existing listeners to prevent duplicates if function called multiple times
+            btn.replaceWith(btn.cloneNode(true));
         });
-    });
+
+        document.querySelectorAll(".add-to-cart").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const productIndex = this.getAttribute("data-index");
+                const product = products[productIndex];
+
+                // Check if already in cart
+                const existingItem = cart.find(i => i.title === product.title);
+                if (existingItem) {
+                    existingItem.quantity += 1;
+                } else {
+                    cart.push({ ...product, quantity: 1 });
+                }
+
+                updateCartUI();
+
+                // Animation for button
+                const originalText = this.textContent;
+                this.textContent = "Додано!";
+                this.style.background = "var(--accent-gold)";
+                this.style.color = "var(--bg-dark)";
+
+                setTimeout(() => {
+                    this.textContent = originalText;
+                    this.style.background = "transparent";
+                    this.style.color = "var(--accent-gold)";
+                }, 1000);
+
+                // Cart bounce animation
+                cartCountEl.parentElement.style.transform = "scale(1.3)";
+                setTimeout(() => {
+                    cartCountEl.parentElement.style.transform = "scale(1)";
+                }, 200);
+            });
+        });
+    }
 
     // Cart Modal Toggles
     cartIcon.addEventListener("click", () => {
