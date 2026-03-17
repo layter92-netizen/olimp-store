@@ -131,18 +131,22 @@ function renderProductList() {
     });
 }
 
-// ─── FORM HANDLING (ADD & EDIT) ──────────────────────────────────
-
 // Helper function to convert Google Drive view links to direct image links
 function processImageUrl(url) {
     url = url.trim();
     if (!url) return '';
     
-    // Check if it's a Google Drive share link like https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+    // Check if it's a Google Drive share link 
     const gDriveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (gDriveMatch && gDriveMatch[1]) {
-        // Convert to direct download link which can be used in <img> tags
-        return `https://drive.google.com/uc?export=view&id=${gDriveMatch[1]}`;
+        // Use Google's thumbnail API which allows embedding
+        return `https://drive.google.com/thumbnail?id=${gDriveMatch[1]}&sz=w800`;
+    }
+    
+    // Check if it's an id-based link
+    const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (url.includes('drive.google.com') && idMatch && idMatch[1]) {
+        return `https://drive.google.com/thumbnail?id=${idMatch[1]}&sz=w800`;
     }
     
     return url;
@@ -273,13 +277,14 @@ async function deleteProductConf(id) {
 // ─── MIGRATION SCRIPT (DEV TOOL) ──────────────────────────────────
 // This button allows fast bootstrapping of the DB parsing existing files
 
-document.getElementById("migrate-btn").addEventListener("click", async () => {
-    if (!confirm("Увага! Це завантажить всі старі товари з файлу в базу даних. Використовуйте лише один раз при налаштуванні. Продовжити?")) return;
+document.getElementById("migrate-btn").addEventListener("click", async function() {
+    this.disabled = true;
+    this.textContent = "Міграція в процесі...";
     
     const logEl = document.getElementById("migrate-log");
-    const testFiles = ["Барабуля г.к 480 грн.jpg", "Биток копчений 455грн.jpg", "Биток сирокопчений 470 грн.jpg", "Вирізка копчена 480 грн.jpg", "Вирізка сирокопчена 490 грн.jpg", "Вомер х.к 350 грн.jpg", "Вуха різані в соусі 410 грн.jpg", "Гомілки копчені 170 грн.jpg", "Джерки 1250 грн.jpg", "Дорадо х.к 750 грн.jpg", "Кабаноси сушені 800 грн.jpg", "Ковбаса  450 грн..jpg", "Ковбаса Рубана Свино-яловича 450 грн.jpg", "Ковбаса Сервілат 400 грн..jpg", "Ковбаса Шахтарська 450 грн..jpg", "Ковбаса домашня 450 грн.jpg", "Ковбаса куряча філейна 400 грн.jpg", "Консерва короп з овочами 155 грн.jpg", "Крило куряче копчене 235 грн.jpg", "Мойва копчена 400 грн.jpg", "Морський окунь г.к  450 грн.jpg", "Намазка з сала 90 грн.jpg", "Ошийок копчений 480 грн..jpg", "Ошийок сирокопчений 490 грн.jpg", "Паштет печінковий  125 грн.jpg", "Паштет рибний 100грн.jpg", "Перепілка копчена 450 грн.jpg", "Підчеревина копчена 360 грн.jpg", "Ребро копчене 380 грн.jpg", "Рулет зі свинин копчений 380 грн.jpg", "Сайра х.к 400 грн.jpg", "Серце куряче копчене 450 грн.jpg", "Скумбрія х.к 630 грн.jpg", "Ставрида копчена 400 грн.jpg", "Стегно куряче 260 грн.jpg", "Тушонка куряча  100 грн.jpg", "Філе куряче 350 грн.jpg", "Шиї курячі 165грн.jpg", "кілька в томаті з овочами 120 грн.jpg", "салака х.к 230 грн.jpg", "хребет копчений 225 грн.jpg"];
+    logEl.innerHTML = "Обробка... Зачекайте хвилину, це може зайняти час залежно від інтернету.";
     
-    logEl.innerHTML = "Обробка...";
+    const testFiles = ["Барабуля г.к 480 грн.jpg", "Биток копчений 455грн.jpg", "Биток сирокопчений 470 грн.jpg", "Вирізка копчена 480 грн.jpg", "Вирізка сирокопчена 490 грн.jpg", "Вомер х.к 350 грн.jpg", "Вуха різані в соусі 410 грн.jpg", "Гомілки копчені 170 грн.jpg", "Джерки 1250 грн.jpg", "Дорадо х.к 750 грн.jpg", "Кабаноси сушені 800 грн.jpg", "Ковбаса  450 грн..jpg", "Ковбаса Рубана Свино-яловича 450 грн.jpg", "Ковбаса Сервілат 400 грн..jpg", "Ковбаса Шахтарська 450 грн..jpg", "Ковбаса домашня 450 грн.jpg", "Ковбаса куряча філейна 400 грн.jpg", "Консерва короп з овочами 155 грн.jpg", "Крило куряче копчене 235 грн.jpg", "Мойва копчена 400 грн.jpg", "Морський окунь г.к  450 грн.jpg", "Намазка з сала 90 грн.jpg", "Ошийок копчений 480 грн..jpg", "Ошийок сирокопчений 490 грн.jpg", "Паштет печінковий  125 грн.jpg", "Паштет рибний 100грн.jpg", "Перепілка копчена 450 грн.jpg", "Підчеревина копчена 360 грн.jpg", "Ребро копчене 380 грн.jpg", "Рулет зі свинин копчений 380 грн.jpg", "Сайра х.к 400 грн.jpg", "Серце куряче копчене 450 грн.jpg", "Скумбрія х.к 630 грн.jpg", "Ставрида копчена 400 грн.jpg", "Стегно куряче 260 грн.jpg", "Тушонка куряча  100 грн.jpg", "Філе куряче 350 грн.jpg", "Шиї курячі 165грн.jpg", "кілька в томаті з овочами 120 грн.jpg", "салака х.к 230 грн.jpg", "хребет копчений 225 грн.jpg"];
     
     for (let filename of testFiles) {
         let cleanName = filename.replace(/\.(jpg|jpeg|png)$/i, "").replace(/\./g, "").trim();
