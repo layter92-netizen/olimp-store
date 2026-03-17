@@ -210,6 +210,7 @@ a {
     justify-content: center;
     margin-bottom: 40px;
     gap: 15px;
+    flex-wrap: wrap; /* Added so buttons wrap on small screens instead of overflowing */
 }
 
 .filter-btn {
@@ -451,6 +452,15 @@ a {
     .nav-links {
         display: none;
     }
+    
+    .filters {
+        gap: 10px;
+    }
+    
+    .filter-btn {
+        padding: 8px 15px;
+        font-size: 0.85rem;
+    }
 
     .product-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -495,6 +505,7 @@ a {
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
     border-left: 1px solid var(--border-color);
+    overflow-y: auto; /* Fix for mobile so the whole side panel scrolls */
 }
 
 .cart-overlay.active .cart-modal {
@@ -507,6 +518,10 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    background: var(--bg-card);
+    z-index: 10;
 }
 
 .cart-header h2 {
@@ -527,8 +542,7 @@ a {
 }
 
 .cart-items {
-    flex-grow: 1;
-    overflow-y: auto;
+    /* flex-grow removed, using standard block layout in the scrolling column */
     padding: 20px;
 }
 
@@ -580,7 +594,6 @@ a {
     padding: 20px;
     border-top: 1px solid var(--border-color);
     background: rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
 }
 
 .cart-total {
@@ -623,6 +636,29 @@ a {
 .checkout-form input:focus,
 .checkout-form select:focus {
     border-color: var(--accent-gold);
+}
+
+@media (max-width: 480px) {
+    .cart-modal {
+        max-width: 100%; /* Full screen width on very small screens */
+    }
+    
+    .checkout-form input,
+    .checkout-form select {
+        padding: 12px 15px; /* Larger tap targets */
+        font-size: 16px; /* Stop iOS auto-zoom on inputs */
+    }
+    
+    .product-action {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .add-to-cart {
+        padding: 12px;
+        font-size: 1rem;
+    }
 }
 
 .w-100 {
