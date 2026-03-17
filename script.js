@@ -94,13 +94,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
                 <div class="product-info">
                     <h3 class="product-title">${product.title}</h3>
-                    <div class="price-row">
-                        <span class="price-placeholder">~${product.price} грн / ${unitLabel}</span>
+                    <div class="price-row" style="margin-bottom: 10px;">
+                        <span class="price-placeholder">${product.price} грн / ${unitLabel}</span>
                     </div>
-                    <div class="product-action">
-                        ${selectionControl}
-                        <button class="add-to-cart" data-index="${originalIndex}">В кошик</button>
-                    </div>
+                    <button class="add-to-cart w-100" data-index="${originalIndex}">Обрати кількість</button>
                 </div>
             `;
 
@@ -167,10 +164,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+    // Qty Modal Elements
+    const qtyModalOverlay = document.getElementById("qty-modal-overlay");
+    const closeQtyModalBtn = document.getElementById("close-qty-modal");
+    const qtyProductName = document.getElementById("qty-product-name");
+    const qtySelectorContainer = document.getElementById("qty-selector-container");
+    const confirmAddToCartBtn = document.getElementById("confirm-add-to-cart");
+    
+    let currentSelectedProductIndex = null;
+
+    closeQtyModalBtn.addEventListener("click", () => {
+        qtyModalOverlay.classList.remove("active");
+    });
+    
+    qtyModalOverlay.addEventListener("click", (e) => {
+        if (e.target === qtyModalOverlay) {
+            qtyModalOverlay.classList.remove("active");
+        }
+    });
+
     // Add to cart functionality
     function attachAddToCartListeners() {
         document.querySelectorAll(".add-to-cart").forEach(btn => {
-            // Remove existing listeners to prevent duplicates if function called multiple times
             btn.replaceWith(btn.cloneNode(true));
         });
 
@@ -178,40 +193,123 @@ document.addEventListener("DOMContentLoaded", async () => {
             btn.addEventListener("click", function () {
                 const productIndex = this.getAttribute("data-index");
                 const product = products[productIndex];
-
-                // Check if already in cart
-                const qtyInput = document.getElementById(`qty-${productIndex}`);
-                const amount = parseFloat(qtyInput.value) || 1;
-
-                const existingItem = cart.find(i => i.title === product.title);
-                if (existingItem) {
-                    existingItem.amount += amount;
+                currentSelectedProductIndex = productIndex;
+                
+                qtyProductName.textContent = product.title;
+                
+                // Build dynamic selector for weight (kg) or pieces (pcs)
+                let selectorHTML = '';
+                if (product.unit === 'pcs') {
+                    selectorHTML = `
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 20px 0;">
+                            <button id="qty-minus" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--accent-gold); background: transparent; color: var(--accent-gold); font-size: 1.5rem;">-</button>
+                            <input type="number" id="modal-qty-input" value="1" min="1" max="50" style="width: 80px; text-align: center; font-size: 1.5rem; background: var(--bg-dark); color: white; border: 1px solid var(--border-color); padding: 10px; border-radius: 5px;">
+                            <button id="qty-plus" style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--accent-gold); background: transparent; color: var(--accent-gold); font-size: 1.5rem;">+</button>
+                            <span style="font-size: 1.2rem;">шт</span>
+                        </div>
+                    `;
+                    qtySelectorContainer.innerHTML = selectorHTML;
+                    
+                    document.getElementById('qty-minus').addEventListener('click', () => {
+                        let input = document.getElementById('modal-qty-input');
+                        if (input.value > 1) input.value = parseInt(input.value) - 1;
+                    });
+                    document.getElementById('qty-plus').addEventListener('click', () => {
+                        let input = document.getElementById('modal-qty-input');
+                        if (input.value < 50) input.value = parseInt(input.value) + 1;
+                    });
+                    
                 } else {
-                    cart.push({ ...product, amount: amount });
+                    selectorHTML = `<div class="weight-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px;">`;
+                    for (let w = 0.3; w <= 1.5; w += 0.1) {
+                        let weight = w.toFixed(1);
+                        let isSelected = weight === "1.0" ? "checked" : "";
+                        selectorHTML += `
+                            <label class="weight-option" style="cursor: pointer; position: relative;">
+                                <input type="radio" name="modal-weight-radio" value="${weight}" ${isSelected} style="position: absolute; opacity: 0;">
+                                <div class="weight-box" style="padding: 15px 5px; border: 1px solid var(--border-color); border-radius: 8px; text-align: center; transition: all 0.3s; background: var(--bg-dark);">${weight} кг</div>
+                            </label>
+                        `;
+                    }
+                    selectorHTML += `</div>`;
+                    qtySelectorContainer.innerHTML = selectorHTML;
+                    
+                    // Add listeners for radio visual styling
+                    document.querySelectorAll('input[name="modal-weight-radio"]').forEach(radio => {
+                        radio.addEventListener('change', updateRadioStyles);
+                    });
+                    updateRadioStyles(); // initial call
                 }
 
-                updateCartUI();
-
-                // Animation for button
-                const originalText = this.textContent;
-                this.textContent = "Додано!";
-                this.style.background = "var(--accent-gold)";
-                this.style.color = "var(--bg-dark)";
-
-                setTimeout(() => {
-                    this.textContent = originalText;
-                    this.style.background = "transparent";
-                    this.style.color = "var(--accent-gold)";
-                }, 1000);
-
-                // Cart bounce animation
-                cartCountEl.parentElement.style.transform = "scale(1.3)";
-                setTimeout(() => {
-                    cartCountEl.parentElement.style.transform = "scale(1)";
-                }, 200);
+                qtyModalOverlay.classList.add("active");
             });
         });
     }
+    
+    function updateRadioStyles() {
+        document.querySelectorAll('input[name="modal-weight-radio"]').forEach(radio => {
+            const box = radio.nextElementSibling;
+            if (radio.checked) {
+                box.style.background = 'var(--accent-gold)';
+                box.style.color = 'var(--bg-dark)';
+                box.style.borderColor = 'var(--accent-gold)';
+                box.style.fontWeight = 'bold';
+            } else {
+                box.style.background = 'var(--bg-dark)';
+                box.style.color = 'var(--text-main)';
+                box.style.borderColor = 'var(--border-color)';
+                box.style.fontWeight = 'normal';
+            }
+        });
+    }
+
+    // Confirm button in Qty Modal
+    confirmAddToCartBtn.addEventListener("click", () => {
+        if (currentSelectedProductIndex === null) return;
+        
+        const product = products[currentSelectedProductIndex];
+        let amount = 1;
+        
+        if (product.unit === 'pcs') {
+            amount = parseFloat(document.getElementById("modal-qty-input").value) || 1;
+        } else {
+            const selectedRadio = document.querySelector('input[name="modal-weight-radio"]:checked');
+            if (selectedRadio) amount = parseFloat(selectedRadio.value);
+            else amount = 1.0;
+        }
+
+        const existingItem = cart.find(i => i.title === product.title);
+        if (existingItem) {
+            existingItem.amount += amount;
+        } else {
+            cart.push({ ...product, amount: amount });
+        }
+
+        updateCartUI();
+
+        // Close modal
+        qtyModalOverlay.classList.remove("active");
+
+        // Cart bounce animation
+        cartCountEl.parentElement.style.transform = "scale(1.3)";
+        setTimeout(() => {
+            cartCountEl.parentElement.style.transform = "scale(1)";
+        }, 200);
+        
+        // Show temporary toast feedback (using standard alert if no toast exists, or update cart count visually)
+        const btn = document.querySelector(`.add-to-cart[data-index="${currentSelectedProductIndex}"]`);
+        if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = "Додано!";
+            btn.style.background = "var(--accent-gold)";
+            btn.style.color = "var(--bg-dark)";
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = "transparent";
+                btn.style.color = "var(--accent-gold)";
+            }, 1000);
+        }
+    });
 
     // Cart Modal Toggles
     cartIcon.addEventListener("click", () => {

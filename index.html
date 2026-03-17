@@ -138,6 +138,25 @@
         </div>
     </div>
 
+    <!-- Custom Quantity Selection Modal -->
+    <div class="cart-overlay" id="qty-modal-overlay">
+        <div class="cart-modal qty-modal">
+            <div class="cart-header">
+                <h2>Виберіть кількість</h2>
+                <button class="close-cart" id="close-qty-modal">&times;</button>
+            </div>
+            <div class="cart-items" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                <h3 id="qty-product-name" style="margin-bottom: 20px; color: var(--accent-gold);">Назва товару</h3>
+                
+                <div id="qty-selector-container" style="margin-bottom: 30px; width: 100%;">
+                    <!-- Radio buttons or input will be injected here -->
+                </div>
+
+                <button id="confirm-add-to-cart" class="btn-primary w-100" style="padding: 15px; font-size: 1.1rem;">Додати в кошик</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 
