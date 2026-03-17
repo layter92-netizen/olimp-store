@@ -133,11 +133,28 @@ function renderProductList() {
 
 // ─── FORM HANDLING (ADD & EDIT) ──────────────────────────────────
 
+// Helper function to convert Google Drive view links to direct image links
+function processImageUrl(url) {
+    url = url.trim();
+    if (!url) return '';
+    
+    // Check if it's a Google Drive share link like https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+    const gDriveMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (gDriveMatch && gDriveMatch[1]) {
+        // Convert to direct download link which can be used in <img> tags
+        return `https://drive.google.com/uc?export=view&id=${gDriveMatch[1]}`;
+    }
+    
+    return url;
+}
+
 // Preview image when URL is entered
 imageInput.addEventListener("input", function() {
-    const url = this.value.trim();
-    if (url) {
-        imagePreview.src = url;
+    const rawUrl = this.value;
+    const processedUrl = processImageUrl(rawUrl);
+    
+    if (processedUrl) {
+        imagePreview.src = processedUrl;
         imagePreview.style.display = "block";
     } else {
         imagePreview.style.display = "none";
@@ -150,7 +167,7 @@ productForm.addEventListener("submit", async (e) => {
     saveBtn.textContent = "Збереження...";
     
     try {
-        let imageUrl = imageInput.value.trim();
+        let imageUrl = processImageUrl(imageInput.value);
         
         if (!imageUrl) {
             // Default image if empty
