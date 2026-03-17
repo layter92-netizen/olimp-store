@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                     
                 } else {
                     selectorHTML = `<div class="weight-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px;">`;
-                    for (let w = 0.3; w <= 1.5; w += 0.1) {
+                    for (let w = 0.2; w <= 2.0; w += 0.2) {
                         let weight = w.toFixed(1);
                         let isSelected = weight === "1.0" ? "checked" : "";
                         selectorHTML += `
