@@ -5,6 +5,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDnB03bwWqadmuU-zGzQ1KKdwbeDtFNygI",
   authDomain: "olymp-shop.firebaseapp.com",
+  databaseURL: "https://olymp-shop-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "olymp-shop",
   storageBucket: "olymp-shop.firebasestorage.app",
   messagingSenderId: "895310779944",
