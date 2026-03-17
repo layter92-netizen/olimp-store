@@ -3,7 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDnB03bwWqadmuU-zGzQlKKdwbeDtFNygI",
+  apiKey: "AIzaSyDnB03bwWqadmuU-zGzQ1KKdwbeDtFNygI",
   authDomain: "olymp-shop.firebaseapp.com",
   projectId: "olymp-shop",
   storageBucket: "olymp-shop.firebasestorage.app",
