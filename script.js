@@ -1,131 +1,35 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // List of product image filenames
-    // When adding a new product, just add its filename here:
-    const productFiles = [
-        "Барабуля г.к 480 грн.jpg",
-        "Биток копчений 455грн.jpg",
-        "Биток сирокопчений 470 грн.jpg",
-        "Вирізка копчена 480 грн.jpg",
-        "Вирізка сирокопчена 490 грн.jpg",
-        "Вомер х.к 350 грн.jpg",
-        "Вуха різані в соусі 410 грн.jpg",
-        "Гомілки копчені 170 грн.jpg",
-        "Джерки 1250 грн.jpg",
-        "Дорадо х.к 750 грн.jpg",
-        "Кабаноси сушені 800 грн.jpg",
-        "Ковбаса  450 грн..jpg",
-        "Ковбаса Рубана Свино-яловича 450 грн.jpg",
-        "Ковбаса Сервілат 400 грн..jpg",
-        "Ковбаса Шахтарська 450 грн..jpg",
-        "Ковбаса домашня 450 грн.jpg",
-        "Ковбаса куряча філейна 400 грн.jpg",
-        "Консерва короп з овочами 155 грн.jpg",
-        "Крило куряче копчене 235 грн.jpg",
-        "Мойва копчена 400 грн.jpg",
-        "Морський окунь г.к  450 грн.jpg",
-        "Намазка з сала 90 грн.jpg",
-        "Ошийок копчений 480 грн..jpg",
-        "Ошийок сирокопчений 490 грн.jpg",
-        "Паштет печінковий  125 грн.jpg",
-        "Паштет рибний 100грн.jpg",
-        "Перепілка копчена 450 грн.jpg",
-        "Підчеревина копчена 360 грн.jpg",
-        "Ребро копчене 380 грн.jpg",
-        "Рулет зі свинин копчений 380 грн.jpg",
-        "Сайра х.к 400 грн.jpg",
-        "Серце куряче копчене 450 грн.jpg",
-        "Скумбрія х.к 630 грн.jpg",
-        "Ставрида копчена 400 грн.jpg",
-        "Стегно куряче 260 грн.jpg",
-        "Тушонка куряча  100 грн.jpg",
-        "Філе куряче 350 грн.jpg",
-        "Шиї курячі 165грн.jpg",
-        "кілька в томаті з овочами 120 грн.jpg",
-        "салака х.к 230 грн.jpg",
-        "хребет копчений 225 грн.jpg"
-    ];
+import { db } from './firebase-config.js';
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // Automatically parse the filename to extract the name and price
-    const products = productFiles.map(filename => {
-        // Remove file extension and replace double spaces
-        let cleanName = filename.replace(/\.(jpg|jpeg|png)$/i, "").replace(/\./g, "").trim();
-
-        // Find the price (numbers before word "грн")
-        // Example matches: "480 грн", "455грн", "450  грн"
-        let priceMatch = cleanName.match(/(\d+)\s*грн/i);
-        let price = 0;
-        let title = cleanName;
-
-        if (priceMatch) {
-            price = parseInt(priceMatch[1], 10);
-            // Remove the price text from the title
-            title = cleanName.replace(priceMatch[0], "").trim();
-            // Remove any trailing hyphens or commas
-            title = title.replace(/[-_,]+$/, "").trim();
-        }
-
-        // Capitalize first letter of title for aesthetics
-        if (title.length > 0) {
-            title = title.charAt(0).toUpperCase() + title.slice(1);
-        }
-
-        return {
-            title: title,
-            image: filename,
-            price: price
-        };
-    });
-
-    // Add categories to products
-    products.forEach(product => {
-        let titleLower = product.title.toLowerCase();
-        let categories = ['all']; // Every product belongs to 'all'
-
-        // Determine unit (kg or pcs)
-        if (titleLower.includes('консерва') || titleLower.includes('паштет') ||
-            titleLower.includes('тушонка') || titleLower.includes('кілька') ||
-            titleLower.includes('намазка')) {
-            product.unit = 'pcs';
-        } else {
-            product.unit = 'kg';
-        }
-
-        // Rule-based categorization
-        if (titleLower.includes('барабуля') || titleLower.includes('вомер') || titleLower.includes('дорадо') ||
-            titleLower.includes('мойва') || titleLower.includes('окунь') || titleLower.includes('сайра') ||
-            titleLower.includes('скумбрія') || titleLower.includes('ставрида') || titleLower.includes('кілька') ||
-            titleLower.includes('салака') || titleLower.includes('рибний')) {
-            categories.push('fish');
-        }
-
-        if (titleLower.includes('биток') || titleLower.includes('вирізка') || titleLower.includes('вуха') ||
-            titleLower.includes('ковбаса') || titleLower.includes('ошийок') || titleLower.includes('підчеревина') ||
-            titleLower.includes('ребро') || titleLower.includes('рулет') || titleLower.includes('намазка з сала') ||
-            titleLower.includes('кабаноси') || titleLower.includes('печінковий')) {
-            categories.push('pork');
-        }
-
-        if (titleLower.includes('гомілки') || titleLower.includes('куряча') || titleLower.includes('куряче') ||
-            titleLower.includes('курячі') || titleLower.includes('перепілка') || titleLower.includes('стегно') ||
-            titleLower.includes('серце') || titleLower.includes('крило')) {
-            categories.push('chicken');
-        }
-
-        if (titleLower.includes('яловича')) {
-            categories.push('beef');
-        }
-
-        // Add 'beer' category for specific items
-        if (titleLower.includes('джерки') || titleLower.includes('кабаноси') || titleLower.includes('вуха') ||
-            titleLower.includes('барабуля') || titleLower.includes('вомер') || titleLower.includes('мойва')) {
-            categories.push('beer');
-        }
-
-        product.categories = categories;
-    });
-
+document.addEventListener("DOMContentLoaded", async () => {
     const productGrid = document.getElementById("product-grid");
     const cartCountEl = document.querySelector(".cart-count");
+    
+    let products = [];
+    
+    // Show loading text
+    productGrid.innerHTML = '<p style="text-align: center; width: 100%; grid-column: 1 / -1;">Завантаження товарів...</p>';
+
+    try {
+        const querySnapshot = await getDocs(collection(db, "products"));
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            // Only add products that are available
+            if (data.available !== false) {
+                products.push({ id: doc.id, ...data });
+            }
+        });
+        
+        // Sort products alphabetically
+        products.sort((a, b) => a.title.localeCompare(b.title));
+        
+        // Initial render now that products are loaded
+        renderProducts();
+    } catch (error) {
+        console.error("Помилка завантаження товарів:", error);
+        productGrid.innerHTML = '<p style="text-align: center; width: 100%; grid-column: 1 / -1; color: #ff4d4d;">Сталася помилка при завантаженні магазину =(. Будь ласка, оновіть сторінку.</p>';
+        return;
+    }
 
     // Cart Elements
     const cartOverlay = document.getElementById("cart-overlay");

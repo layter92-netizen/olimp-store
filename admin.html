@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Олімп - Адмін-панель</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Admin specific styles */
+        body { padding-top: 20px; }
+        .admin-container { max-width: 1000px; margin: 0 auto; padding: 20px; background: rgba(18, 18, 18, 0.8); border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.2); }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--accent-gold); padding-bottom: 15px; }
+        h1, h2 { color: var(--accent-gold); }
+        .hidden { display: none !important; }
+        
+        /* Auth Form */
+        .auth-form { display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 50px auto; }
+        .auth-form input { padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; }
+        .auth-form button { padding: 12px; background: var(--accent-gold); color: var(--bg-dark); font-weight: bold; border-radius: 8px; border: none; cursor: pointer; }
+        
+        /* Dashboard Layout */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        
+        /* Product Form */
+        .product-form { display: flex; flex-direction: column; gap: 15px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; }
+        .product-form input[type="text"], .product-form input[type="number"], .product-form select { width: 100%; padding: 10px; border-radius: 6px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; margin-top: 5px; }
+        .product-form label { font-size: 0.9em; color: #ccc; }
+        .categories-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .btn-submit { background: #4BB543; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-submit:hover { opacity: 0.9; }
+        
+        /* Product List */
+        .product-list { display: flex; flex-direction: column; gap: 15px; max-height: 800px; overflow-y: auto; padding-right: 10px; }
+        .admin-product-card { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; align-items: center; border: 1px solid transparent; }
+        .admin-product-card.unavailable { opacity: 0.6; border-color: rgba(255,0,0,0.3); }
+        .admin-img-preview { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+        .admin-product-info { flex-grow: 1; }
+        .admin-product-actions { display: flex; gap: 10px; flex-direction: column; }
+        .btn-edit { background: var(--accent-gold); color: black; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-delete { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        
+        /* Toasts */
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: white; padding: 15px 25px; border-radius: 8px; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: #4BB543; }
+        .toast.error { background: #ff4d4d; }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Адмін-панель Олімп</h1>
+            <a href="index.html" style="color: #ccc; text-decoration: none;">← Повернутися в магазин</a>
+            <button id="logout-btn" class="hidden" style="background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Вийти</button>
+        </div>
+
+        <!-- Auth Section -->
+        <div id="auth-section">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <p>Увійдіть, щоб управляти товарами</p>
+            </div>
+            <form id="login-form" class="auth-form">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Пароль" required>
+                <button type="submit" id="login-btn">Увійти</button>
+                <div id="login-error" style="color: #ff4d4d; text-align: center; margin-top: 10px; font-size: 0.9em;"></div>
+            </form>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="hidden">
+            <div class="dashboard-grid">
+                
+                <!-- Add/Edit Form -->
+                <div>
+                    <h2 id="form-title">Додати новий товар</h2>
+                    <form id="product-form" class="product-form">
+                        <input type="hidden" id="doc-id">
+                        
+                        <div>
+                            <label>Назва товару</label>
+                            <input type="text" id="p-title" required placeholder="Напр. Ковбаса домашня">
+                        </div>
+                        
+                        <div>
+                            <label>Ціна (грн)</label>
+                            <input type="number" id="p-price" required min="1">
+                        </div>
+                        
+                        <div>
+                            <label>Одиниця виміру</label>
+                            <select id="p-unit">
+                                <option value="kg">Кілограми (кг)</option>
+                                <option value="pcs">Штуки (шт)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label>Посилання на зображення (з Google Drive, Imgur, або назва файлу)</label>
+                            <input type="text" id="p-image-url" placeholder="Напр. https://... або photo.jpg">
+                            <img id="image-preview" src="" style="width: 100px; height: 100px; object-fit: cover; margin-top: 10px; border-radius: 8px; display: none;">
+                        </div>
+                        
+                        <div>
+                            <label>Категорії</label>
+                            <div class="categories-grid">
+                                <label class="checkbox-label"><input type="checkbox" name="category" value="pork"> Свинина</label>
+                                <label class="checkbox-label"><input type="checkbox" name="category" value="chicken"> Курятина</label>
+                                <label class="checkbox-label"><input type="checkbox" name="category" value="beef"> Яловичина</label>
+                                <label class="checkbox-label"><input type="checkbox" name="category" value="fish"> Риба</label>
+                                <label class="checkbox-label"><input type="checkbox" name="category" value="beer"> До пива</label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="checkbox-label" style="font-size: 1.1em; margin-top: 10px; color: white;">
+                                <input type="checkbox" id="p-available" checked> Товар в наявності
+                            </label>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn-submit" id="save-btn" style="flex: 1;">Зберегти товар</button>
+                            <button type="button" id="cancel-edit-btn" class="hidden" style="background: #666; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer;">Скасувати</button>
+                        </div>
+                    </form>
+                    
+                    <button id="migrate-btn" style="margin-top: 30px; background: rgba(255,255,255,0.1); color: #999; border: 1px dotted #666; padding: 8px; border-radius: 4px; font-size: 0.8em; cursor: pointer; width: 100%;">
+                        Інструмент розробника: Завантажити старі товари в БД
+                    </button>
+                    <div id="migrate-log" style="font-size: 0.8em; color: #999; margin-top: 5px;"></div>
+                </div>
+
+                <!-- Product List -->
+                <div>
+                    <h2>Список товарів</h2>
+                    <div id="product-list" class="product-list">
+                        <div style="text-align: center; padding: 20px; color: #999;">Завантаження...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Повідомлення</div>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
