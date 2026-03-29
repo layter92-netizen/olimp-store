@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             cartItemEl.innerHTML = `
                 <img src="${item.image}" alt="${item.title}">
                 <div class="cart-item-info">
-                    <div class="cart-item-title">${item.title}</div>
+                    <div class="cart-item-title">${item.title}${item.selectedSize ? ` (${item.selectedSize})` : ''}</div>
                     <div class="cart-item-price">${amountDisplay} x ~${item.price} грн = ~${Math.round(itemSum)} грн</div>
                 </div>
                 <div class="cart-item-actions">
@@ -168,6 +168,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const qtyModalOverlay = document.getElementById("qty-modal-overlay");
     const closeQtyModalBtn = document.getElementById("close-qty-modal");
     const qtyProductName = document.getElementById("qty-product-name");
+    const sizeSelectorContainer = document.getElementById("size-selector-container");
     const qtySelectorContainer = document.getElementById("qty-selector-container");
     const confirmAddToCartBtn = document.getElementById("confirm-add-to-cart");
     
@@ -196,6 +197,30 @@ document.addEventListener("DOMContentLoaded", async () => {
                 currentSelectedProductIndex = productIndex;
                 
                 qtyProductName.textContent = product.title;
+                
+                // Size selection logic
+                if (product.hasSizes) {
+                    sizeSelectorContainer.style.display = "block";
+                    sizeSelectorContainer.innerHTML = `
+                        <p style="margin-bottom: 10px; font-size: 0.9rem; color: var(--text-muted); text-align: left;">Виберіть частину:</p>
+                        <div class="size-grid">
+                            <button class="size-option-btn active" data-size="Ціла">Ціла</button>
+                            <button class="size-option-btn" data-size="1/2">1/2</button>
+                        </div>
+                    `;
+                    
+                    // Add listeners for size buttons
+                    const sizeBtns = sizeSelectorContainer.querySelectorAll(".size-option-btn");
+                    sizeBtns.forEach(sb => {
+                        sb.addEventListener("click", () => {
+                            sizeBtns.forEach(btn => btn.classList.remove("active"));
+                            sb.classList.add("active");
+                        });
+                    });
+                } else {
+                    sizeSelectorContainer.style.display = "none";
+                    sizeSelectorContainer.innerHTML = "";
+                }
                 
                 // Build dynamic selector for weight (kg) or pieces (pcs)
                 let selectorHTML = '';
@@ -278,11 +303,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             else amount = 1.0;
         }
 
-        const existingItem = cart.find(i => i.title === product.title);
+        let selectedSize = null;
+        if (product.hasSizes) {
+            const activeSizeBtn = sizeSelectorContainer.querySelector(".size-option-btn.active");
+            if (activeSizeBtn) selectedSize = activeSizeBtn.getAttribute("data-size");
+        }
+
+        const existingItem = cart.find(i => i.title === product.title && i.selectedSize === selectedSize);
         if (existingItem) {
             existingItem.amount += amount;
         } else {
-            cart.push({ ...product, amount: amount });
+            cart.push({ ...product, amount: amount, selectedSize: selectedSize });
         }
 
         updateCartUI();
@@ -343,7 +374,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const itemSum = Math.round(item.price * item.amount);
             totalOrderSum += itemSum;
             const amountDisplay = item.unit === 'pcs' ? `${item.amount} шт.` : `${item.amount.toFixed(1)} кг`;
-            return `- ${item.title}: ${amountDisplay} x ~${item.price} грн = ~${itemSum} грн`;
+            const sizeLabel = item.selectedSize ? ` (${item.selectedSize})` : '';
+            return `- ${item.title}${sizeLabel}: ${amountDisplay} x ~${item.price} грн = ~${itemSum} грн`;
         });
 
         orderList.push(`\nЗагальна сума (орієнтовно): ~${totalOrderSum} грн`);

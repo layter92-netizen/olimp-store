@@ -23,6 +23,7 @@ const imageInput = document.getElementById("p-image-url");
 const imagePreview = document.getElementById("image-preview");
 const categoryInputs = document.querySelectorAll('input[name="category"]');
 const availableInput = document.getElementById("p-available");
+const hasSizesInput = document.getElementById("p-has-sizes");
 const docIdInput = document.getElementById("doc-id");
 const saveBtn = document.getElementById("save-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
@@ -190,7 +191,8 @@ productForm.addEventListener("submit", async (e) => {
             unit: unitInput.value,
             image: imageUrl,
             categories: selectedCategories,
-            available: availableInput.checked
+            available: availableInput.checked,
+            hasSizes: hasSizesInput.checked
         };
         
         const editingId = docIdInput.value;
@@ -227,6 +229,7 @@ function editProduct(id) {
     unitInput.value = product.unit || 'kg';
     imageInput.value = product.image || '';
     availableInput.checked = product.available !== false;
+    hasSizesInput.checked = product.hasSizes === true;
     
     // Categories
     const cats = product.categories || [];
@@ -254,6 +257,7 @@ function resetForm() {
     docIdInput.value = "";
     imageInput.value = "";
     imagePreview.style.display = "none";
+    hasSizesInput.checked = false;
     formTitle.textContent = "Додати новий товар";
     saveBtn.textContent = "Зберегти товар";
     cancelEditBtn.classList.add("hidden");

@@ -75,6 +75,7 @@
                 <button class="filter-btn" data-filter="pork">🐷 Свинина</button>
                 <button class="filter-btn" data-filter="chicken">🐔 Курятина</button>
                 <button class="filter-btn" data-filter="beef">🐮 Яловичина</button>
+                <button class="filter-btn" data-filter="marinated_fish">🎣 Маринована рибка</button>
                 <button class="filter-btn" data-filter="autoclave">🥫 Автоклавна продукція</button>
                 <button class="filter-btn" data-filter="beer">🍻 До пива</button>
             </div>
@@ -190,6 +191,10 @@
             <div class="cart-items" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
                 <h3 id="qty-product-name" style="margin-bottom: 20px; color: var(--accent-gold);">Назва товару</h3>
                 
+                <div id="size-selector-container" style="width: 100%; margin-bottom: 20px; display: none;">
+                    <!-- Size buttons will be injected here -->
+                </div>
+
                 <div id="qty-selector-container" style="margin-bottom: 30px; width: 100%;">
                     <!-- Radio buttons or input will be injected here -->
                 </div>
